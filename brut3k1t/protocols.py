@@ -13,7 +13,7 @@ Description:
     - smtp      Port: 25
     - xmpp      Port: 5222
 
-Dependencies: main > smtplib, paramiko, ftplib
+Dependencies: smtplib, paramiko, ftplib, telnetlib
 
 Version: v1.0.0
 Author: ex0dus
@@ -21,7 +21,12 @@ License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
 
 '''
 
-from src.main import *
+from consts import *
+
+import smtplib
+import paramiko
+import ftplib
+import telnetlib
 
 class ProtocolBruteforce:
     def __init__(self, service, address, username, wordlist, port, delay):

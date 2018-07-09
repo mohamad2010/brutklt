@@ -16,7 +16,7 @@ Description:
     their authentication in the past. NOTE that rate-limiting may be present within their
     respective login forms, so timeouts delays are reinforced.
 
-Dependencies: main > selenium
+Dependencies: selenium
 
 Version: v1.0.0
 Author: ex0dus
@@ -24,7 +24,12 @@ License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
 
 '''
 
-from src.main import *
+from consts import *
+
+from xmpp import Client
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 # Assert: If specified string is NOT found, that means that user has succcessfully logged in.
 # The specified string usually means that the search query is erroneous, meaning that no

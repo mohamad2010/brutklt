@@ -1,6 +1,6 @@
 *.pyc
-venv
-modules
-tests
-env/
+*.egg-info
 *.log
+env/
+dist/
+build/

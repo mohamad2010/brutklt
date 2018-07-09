@@ -12,7 +12,7 @@ Description:
     - sha1
     - sha224
 
-Dependencies: main > hashlib
+Dependencies: hashlib
 
 Version: v1.0.0
 Author: ex0dus
@@ -20,7 +20,9 @@ License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
 
 '''
 
-from src.main import *
+from consts import *
+
+import hashlib
 
 class HashCrack:
     def __init__(self, service, targetHash, wordlist, delay):

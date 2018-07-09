@@ -57,17 +57,18 @@ Requirements:
 * wget
 * tar
 
-brut3k1t exists as a singular Python executable, with core libraries and other dependency code residing in `core` and `src`.
+brut3k1t is available on PyPI! You can install using `pip`:
 
-    git clone https://github.com/ex0dus-0x/brut3k1t.git && cd brut3k1t
+```
+$ pip install brut3k1t
+```
 
-Use the installer to install the proper requirements. This should work on a majority of Linux distributions:
+Or, if you choose to build from source:
 
-    ./installer
-
-And run!
-
-    ./brut3k1t -h
+```
+$ git clone https://github.com/ex0dus-0x/brut3k1t && cd brut3k1t/
+$ python setup.py install
+```
 
 ## 3. Troubleshooting
 

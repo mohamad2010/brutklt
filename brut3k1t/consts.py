@@ -1,22 +1,8 @@
  # -*- coding: utf-8 -*-
-import socket
-import os
-import requests
 import sys
+
 from time import sleep
 from random import *
-
-import smtplib
-import argparse
-import paramiko
-import mechanize
-import telnetlib
-import ftplib
-import hashlib
-from xmpp import Client
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -32,7 +18,12 @@ GR = '\033[37m'  # gray
 
 TIMEOUT = "Please wait a few minutes before you try again."
 
-header = """
+# Contains the services/protocols that can be utilized in our program
+PROTOCOLS = ["ssh", "ftp", "smtp", "telnet", "xmpp"]
+WEB = ["instagram", "twitter", "facebook"]
+HASHCRACK = ["md5", "sha1", "sha224"]
+
+HEADER = """
 
   _                _   _____ _    _ _
  | |__  _ __ _   _| |_|___ /| | _/ | |_

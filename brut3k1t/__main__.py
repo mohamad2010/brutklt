@@ -1,10 +1,17 @@
-#!/usr/bin/python
-from src import *
+#!/usr/bin/env python2
+from consts import *
+
+import hashcrack
+import protocols
+import web
+
+import argparse
+import sys
+import os
 
 def main():
-    os.system("rm -rf tmp/ geckodriver.log") # delete tmp if created from previous usage
 
-    print header
+    print HEADER
 
     parser = argparse.ArgumentParser(description='Bruteforce framework written in Python')
     required = parser.add_argument_group('required arguments')
@@ -29,67 +36,67 @@ def main():
             print R + "[!] You have to specify a username AND a wordlist! [!]" + W
             exit(1)
 
-    service = args.service
-    username = args.username
-    wordlist = args.wordlist
-    address = args.address
-    port = args.port
-    delay = args.delay
-
-    # Contains the services/protocols that can be utilized in our program
-    protocols = ["ssh", "ftp", "smtp", "telnet", "xmpp"]
-    web = ["instagram", "twitter", "facebook"]
-    hashcrack = ["md5", "sha1", "sha224"]
-
     # Detect if service arg is provided
-    if service is None:
+    if args.service is None:
         print R + "[!] No service provided! [!]" + W
         exit(1)
+
     # Detect is wordlist path is correct
-    if os.path.exists(wordlist) == False:
+    if os.path.exists(args.wordlist) == False:
         print R + "[!] Wordlist not found! [!]" + W
         exit(1)
 
 
     # Check if the service provided is for hashcracking.
-    if service in hashcrack:
+    if args.service in HASHCRACK:
         print (O + "[!] Hashcrack detected! [!]") + W
-        print (G + "[*] Hashstring: %s " % username) + W
+        print (G + "[*] Hashstring: %s " % args.username) + W
     else:
-        print (G + "[*] Username: %s " % username) + W
+        print (G + "[*] Username: %s " % args.username) + W
 
     sleep(0.5)
 
     # Print path to wordlist supplied
-    print (G + "[*] Wordlist: %s " % wordlist) + W
+    print (G + "[*] Wordlist: %s " % args.wordlist) + W
 
     sleep(0.5)
 
     # Print service being utilized
-    print (C + "[*] Service: %s "  % service) + W
+    print (C + "[*] Service: %s "  % args.service) + W
 
-    if delay is None:
+    if args.delay is None:
         print O + "[?] Delay not set! Default to 1 [?]" + W
-        delay = 1
+        args.delay = 1
 
     sleep(0.5)
 
-    if service in protocols:
-        p = ProtocolBruteforce(service, address, username, wordlist, port, delay)
+    # main program execution
+    if args.service in PROTOCOLS:
+
+        # perform protocol-based bruteforce
+        p = protocols.ProtocolBruteforce(args.service, args.address, args.username, args.wordlist, args.port, args.delay)
         p.execute()
-    elif service in web:
+
+    elif args.service in WEB:
+
         # Web services do not require addresses or ports
-        if address or port:
+        if args.address or args.port:
             print R + "[!] NOTE: You don't need to provide an address OR port [!]" + W
             exit(1)
-        w = WebBruteforce(service, username, wordlist, delay)
+
+        # perform web-based bruteforce
+        w = web.WebBruteforce(args.service, args.username, args.wordlist, args.delay)
         w.execute()
-    elif service in hashcrack:
+
+    elif args.service in HASHCRACK:
+
         # Hashcrack does not require address or port
-        if address or port:
+        if args.address or args.port:
             print R + "[!] NOTE: You don't need to provide an address OR port [!]" + W
             exit(1)
-        h = HashCrack(service, username, wordlist, delay)
+
+        # perform hashcracking
+        h = hashcrack.HashCrack(args.service, args.username, args.wordlist, args.delay)
         h.execute()
 
 
