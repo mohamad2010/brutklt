@@ -1,24 +1,44 @@
-#!/usr/bin/env python2
-from consts import *
+#!/usr/bin/env python3
+"""
+__main__.py
 
-import hashcrack
-import protocols
-import web
+    Main CLI entry point to the `brute` application. Provides
+    interface for selecting attack and specifying parameters.
 
-import argparse
+"""
+import time
+import random
 import sys
 import os
+import argparse
+
+from brute import (
+    colors,
+    hashcrack,
+    protocols,
+    web
+)
+
+PROTOCOLS = ["ssh", "ftp", "smtp", "telnet", "xmpp"]
+WEB = ["instagram", "twitter", "facebook"]
+HASHCRACK = ["md5", "sha1", "sha224"]
+
 
 def main():
-
-    print HEADER
+    print("""
+  _                _   _____
+ | |__  _ __ _   _| |_|___ /
+ | '_ \| '__| | | | __| |_ \
+ | |_) | |  | |_| | |_ ___) |
+ |_.__/|_|   \__,_|\__|____/
+    security-oriented bruteforce tool.
+""")
 
     parser = argparse.ArgumentParser(description='Bruteforce framework written in Python')
     required = parser.add_argument_group('required arguments')
     required.add_argument('-s', '--service', dest='service', help="Provide a service being attacked.\
                           The Protocols and Services supported are SSH, FTP, SMTP, XMPP, TELNET, INSTAGRAM, FACEBOOK, TWITTER, MD5, SHA1, SHA224",\
                           metavar='', choices=['ssh', 'ftp', 'smtp', 'xmpp', 'telnet', 'instagram', 'facebook', 'twitter', 'md5', 'sha1', 'sha224'])
-    # if submitting a hashstring, also use this argument!
     required.add_argument('-u', '--username', dest='username', help='Provide a valid username/hashstring for service/protocol/hashcrack being executed')
     required.add_argument('-w', '--wordlist', dest='wordlist', help='Provide a wordlist or directory to a wordlist')
     parser.add_argument('-a', '--address', dest='address', help='Provide host address for specified service. Required for certain protocols')
@@ -31,68 +51,64 @@ def main():
     man_options = ['username', 'wordlist']
     for m in man_options:
         if not args.__dict__[m]:
-            # Print help for convenience
             parser.print_help()
-            print R + "[!] You have to specify a username AND a wordlist! [!]" + W
+            colors.error("[!] You have to specify a username AND a wordlist! [!]")
             exit(1)
 
     # Detect if service arg is provided
     if args.service is None:
-        print R + "[!] No service provided! [!]" + W
+        colors.error("[!] No service provided! [!]")
         exit(1)
 
     # Detect is wordlist path is correct
     if os.path.exists(args.wordlist) == False:
-        print R + "[!] Wordlist not found! [!]" + W
+        colors.error("[!] Wordlist not found! [!]")
         exit(1)
 
 
     # Check if the service provided is for hashcracking.
     if args.service in HASHCRACK:
-        print (O + "[!] Hashcrack detected! [!]") + W
-        print (G + "[*] Hashstring: %s " % args.username) + W
+        colors.warn("[!] Hashcrack detected! [!]")
+        colors.good("[*] Hashstring: {}".format(args.username))
     else:
-        print (G + "[*] Username: %s " % args.username) + W
+        colors.good("[*] Username: {}".format(args.username))
 
-    sleep(0.5)
 
-    # Print path to wordlist supplied
-    print (G + "[*] Wordlist: %s " % args.wordlist) + W
+    time.sleep(0.5)
+    colors.good("[*] Wordlist: {}".format(args.wordlist))
 
-    sleep(0.5)
-
-    # Print service being utilized
-    print (C + "[*] Service: %s "  % args.service) + W
+    time.sleep(0.5)
+    print(C + "[*] Service: {}".format(arg.service) + W)
 
     if args.delay is None:
-        print O + "[?] Delay not set! Default to 1 [?]" + W
+        colors.warn("[?] Delay not set! Default to 1 [?]")
         args.delay = 1
 
-    sleep(0.5)
+    time.sleep(0.5)
 
     # main program execution
-    if args.service in PROTOCOLS:
+    if args.service in colors.PROTOCOLS:
 
         # perform protocol-based bruteforce
         p = protocols.ProtocolBruteforce(args.service, args.address, args.username, args.wordlist, args.port, args.delay)
         p.execute()
 
-    elif args.service in WEB:
+    elif args.service in colors.WEB:
 
         # Web services do not require addresses or ports
         if args.address or args.port:
-            print R + "[!] NOTE: You don't need to provide an address OR port [!]" + W
+            colors.error("[!] NOTE: You don't need to provide an address OR port [!]")
             exit(1)
 
         # perform web-based bruteforce
         w = web.WebBruteforce(args.service, args.username, args.wordlist, args.delay)
         w.execute()
 
-    elif args.service in HASHCRACK:
+    elif args.service in colors.HASHCRACK:
 
         # Hashcrack does not require address or port
         if args.address or args.port:
-            print R + "[!] NOTE: You don't need to provide an address OR port [!]" + W
+            colors.error("[!] NOTE: You don't need to provide an address OR port [!]")
             exit(1)
 
         # perform hashcracking
@@ -104,5 +120,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print R + "\n[!] Keyboard Interrupt detected! Killing program... [!]" + W
+        colors.error("\n[!] Keyboard Interrupt detected! Killing program... [!]")
         exit(1)

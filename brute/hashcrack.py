@@ -1,8 +1,8 @@
-'''
-hashcrack.py - Core module for vulnerable hash bruteforcing
+"""
+hashcrack.py
 
-Category: Core
-Description:
+    Core module for vulnerable hash bruteforcing
+
     This module provides the methods for hashcracking vulnerable one-way
     functions. This is achieved by recursively checking each cleartext's hash
     against the current hashstring. Since Python's hashlib library provides
@@ -11,18 +11,13 @@ Description:
     - md5
     - sha1
     - sha224
+"""
 
-Dependencies: hashlib
+import brute.colors
 
-Version: v1.0.0
-Author: ex0dus
-License: GPL-3.0 || https://opensource.org/licenses/GPL-3.0
-
-'''
-
-from consts import *
-
+import time
 import hashlib
+
 
 class HashCrack:
     def __init__(self, service, targetHash, wordlist, delay):
@@ -31,11 +26,11 @@ class HashCrack:
         self.delay = delay
 
         if service == "md5":
-	       self.hashtype = hashlib.md5()
+            self.hashtype = hashlib.md5()
         elif service == "sha1":
-           self.hashtype = hashlib.sha1()
+            self.hashtype = hashlib.sha1()
         elif service == "sha224":
-           self.hashtype = hashlib.sha224()
+            self.hashtype = hashlib.sha224()
 
     def execute(self):
         wordlist = open(self.wordlist, 'r')
@@ -46,10 +41,10 @@ class HashCrack:
 
             try:
                 if checkedHash != self.targetHash:
-                    print O + "[*] Target Hash: %s | [*] Current Hash: %s | [*] Cleartext: %s | Incorrect!\n" % (self.targetHash, checkedHash, password) + W
-                    sleep(self.delay)
+                    colors.warn("[*] Target Hash: {} | [*] Current Hash: {} | [*] Cleartext: {} | Incorrect!".format(self.targetHash, checkedHash, password))
+                    time.sleep(self.delay)
                 elif checkedHash == self.targetHash:
-                    print G + "[*] Target Hash: %s | [*] Current Hash: %s | [*] Cleartext: %s | Found!\n" % (self.targetHash, checkedHash, password) + W
+                    colors.green("[*] Target Hash: {} | [*] Current Hash: {} | [*] Cleartext: {} | Found!".format(self.targetHash, checkedHash, password))
                     wordlist.close()
                     exit(0)
             except KeyboardInterrupt:
