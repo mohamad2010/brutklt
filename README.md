@@ -1,147 +1,115 @@
-# brute
+<p align="center">
+    <h1> brute </h1>
+    <a href="https://github.com/ex0dus-0x/brute/issues"><img src="https://img.shields.io/github/issues/ex0dus-0x/brute.svg" alt="Github forks"></img></a>
+    <a href="https://raw.githubusercontent.com/ex0dus-0x/brute/master/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></img></a>
 
-[![GitHub forks](https://img.shields.io/github/forks/ex0dus-0x/brute.svg)](https://github.com/ex0dus-0x/brut3k1t/network)
-[![GitHub issues](https://img.shields.io/github/issues/ex0dus-0x/brute.svg)](https://github.com/ex0dus-0x/brut3k1t/issues)
-[![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/ex0dus-0x/brute/master/LICENSE)
+</p>
 
-__brute__ is a security-oriented tool for conducting bruteforce attacks against a multitude of protocols and services
-
-> NOTE: this has been renamed to brute, and depreciated. No further support will be provided after the latest final commit.
+Crowd-sourced credential stuffing engine built for security professionals
 
 ## Introduction
 
-__brute__ is a  bruteforce framework that supports dictionary attacks for several protocols and services.
-The current protocols that are complete and in support are:
+__brute__ is a Python-based library framework and engine that enables security professionals to rapidly construct bruteforce / credential stuffing attacks. It features both a multi-purpose command-line application (`brute`), and a software library that can be used in tandem to quickly generate standalone module scripts for attack.
 
-```
-----------------
-Protocols:
-----------------
-ssh
-ftp
-smtp
-xmpp
-telnet
+You can use __brute__ to:
 
-----------------
-Webbased Services
-----------------
-instagram
-facebook
-twitter
+* Quickly launch an attack with the `brute` CLI with an included module (ie. SMTP server, or a Twitter account)
+* Use the CLI to generate a module, which you can then run as a standalone script, or incorporate as part of your local module registry
+* Use community modules from the global registry to "crowdsource" your attacks (NOTE: global registry is WIP)
 
-----------------
-Hashcrack
-----------------
-md5
-sha1
-sha224
-```
+### What can you do with it?
 
-Libraries for connecting and authenticating to network protocols have existed as part of most programming languages' standard library, and brute abuses them in order to execute bruteforce attacks. As for web-based services and sites, by utilizing browser manipulation, brute relies on a bot to visit the webpage, hooking onto authentication input field elements, and sending the username / password.
+* Rapidly test publicly leaked credential corpora against multiple services.
+* Construct PoC scripts quickly to test rate-limiting for authentication systems.
+* Launch an active credential reuse campaign as part of an OSINT profile.
 
+## Features
 
-## Installation
-
-```
-$ git clone https://github.com/ex0dus-0x/brute && cd brut3k1t/
-$ python setup.py install
-```
+* __Functional__ - works out-of-the-box with 7 default modules for attacks on both network protocols and web-based services
+* __Simple to use__ - launch an attack or implement an attack module in minutes and fewer lines of code!
+* __Plugin manager__ - implement your own attack modules, and upload them to the local and global registry, or pull others from the community.
+* __Logging facilities__ - incorporate dumped logs into a logging pipeline / SIEM.
 
 ## Usage
 
-```
-usage: brute [-h] [-s] [-u USERNAME] [-w WORDLIST] [-a ADDRESS] [-p PORT]
-            [-d DELAY]
+`brute` is built for Python 3.7+, and should work with any platform, preferably macOS/Linux.
 
-Bruteforce framework written in Python
+To use `brute`, you can either install through `pip`:
+
+```
+$ pip install brute --user
+```
+
+or build locally:
+
+```
+$ git clone https://github.com/ex0dus-0x/brute
+$ cd brute/
+$ python3 setup.py install
+```
+
+### CLI Usage
+
+```
+usage: brute [-h] [--list_modules] [--add_module ADD_MODULE] [--new_module NEW_MODULE] [-m MODULE] [-u USERNAME] [-w WORDLIST]
+             [-a ADDRESS] [-p PORT] [-d DELAY]
+
+crowd-sourced credential stuffing engine
 
 optional arguments:
   -h, --help            show this help message and exit
-  -a ADDRESS, --address ADDRESS
-                      Provide host address for specified service. Required
-                      for certain protocols
-  -p PORT, --port PORT  Provide port for host address for specified service.
-                      If not specified, will be automatically set
-  -d DELAY, --delay DELAY
-                      Provide the number of seconds the program delays as
-                      each password is tried
 
-required arguments:
-  -s , --service        Provide a service being attacked. The Protocols and
-                      Services supported are SSH, FTP, SMTP, XMPP, TELNET,
-                      INSTAGRAM, FACEBOOK, TWITTER, MD5, SHA1, SHA224
+Module Management:
+  --list_modules        List out the currently available modules in the local registry.
+  --add_module ADD_MODULE
+                        Add a new module to the local registry.
+  --new_module NEW_MODULE
+                        Given a specifier (type/name), initializes a new module plugin script to current dir.
+
+Launching an Attack:
+  -m MODULE, --module MODULE
+                        Provide a valid module to be executed.
   -u USERNAME, --username USERNAME
-                      Provide a valid username/hashstring for
-                      service/protocol/hashcrack being executed
+                        Provide a valid username/identifier for module being executed
   -w WORDLIST, --wordlist WORDLIST
-                      Provide a wordlist or directory to a wordlist
+                        Provide a file path or directory to a wordlist
+  -a ADDRESS, --address ADDRESS
+                        Provide host address for specified service. Required for certain protocols
+  -p PORT, --port PORT  Provide port for host address for specified service. If not specified, will be automatically set as default.
+  -d DELAY, --delay DELAY
+                        Provide the number of seconds the program delays as each password is tried
 ```
 
-Note that with the new release of the hashcrack feature, the `--username` flag is used to supply the target hashstring for hash cracking!
-
-## Examples:
-
-Bruteforcing SSH server running on `192.168.1.3` using `root` and `wordlist.txt` as a wordlist.
+To interact with the modules in your local registry, you can do the following:
 
 ```
-$ brute -s ssh -a 192.168.1.3 -u root -w wordlist.txt
+# show all modules in registry
+$ brute --list_modules
+
+# create a new plugin script
+$ brute --new_module web/mysite
+
+# .. edit it with functionality
+$ vim mysite.py
+
+# now you can run it normally ...
+$ python3 mysite.py --username test --wordlist wordlist.txt
+
+# .. or add it to the registry and use it with the cli
+$ brute --add_module mysite.py
+$ brute -m mysite --username test --wordlist wordlist.txt
 ```
 
-The program will automatically set the port to 22, but if it is different, specify with `-p` flag.
+### Library
 
-Cracking email `test@gmail.com` with `wordlist.txt` on port `25` with a 3 second delay. For email it is necessary to use the SMTP server's address. For e.g Gmail = `smtp.gmail.com`. You can research this using Google.
-
-```
-$ brute -s smtp -a smtp.gmail.com -u test@gmail.com -w wordlist.txt -p 25 -d 3
-```
-
-Cracking XMPP `test@creep.im` with `wordlist.txt` on default port `5222`. XMPP also is similar to SMTP, whereas you will need to provide the address of the XMPP server, in this case `creep.im`.
-
-```
-$ brute -s xmpp -a creep.im -u test -w wordlist.txt
-```
-
-Cracking Facebook requires either the username (preferable, in this case, `test`), email, phone number, or even ID.
-
-```
-$ brute -s facebook -u test -w wordlist.txt
-```
-
-Cracking Instagram with username `test` with wordlist `wordlist.txt` and a 5 second delay
-
-```
-$ brute -s instagram -u test -w wordlist.txt -d 5
-```
-
-Cracking Twitter with username `test` with wordlist `wordlist.txt`
-
-```
-$ brute -s twitter -u test -w wordlist.txt
-```
-
-Cracking a MD5 hash (where username is the hashstring) with wordlist `wordlist.txt`
-
-```
-$ brute -s md5 -u 86bd1db79525abdd576165c1427f9bf6 -w wordlist.txt
-```
-
-## Troubleshooting
-
-1. `Can't load the profile. Profile Dir: /some/path`, or `'geckodriver' executable needs to be in PATH. `
-
-`geckodriver` is not in the `PATH`. Make sure that you have run the installer before-hand, and that there is a `geckodriver` in your `PATH` (e.g `/usr/bin`). If not, you may have to manually put it there by downloading the executable [here](https://github.com/mozilla/geckodriver/releases/), and placing it in your `PATH`.
-
-2. Twitter/Facebook/Instagram login page is not rendering / brute is not hooking onto page!
-
-Web-based services often change their authentication page front-end. If this is the case and new extraneous elements are introduced (such as unnecessary "loading bars"), use a higher delay. This way, the program is able to wait until they go away, and then inject the username/password.
+(TODO)
 
 ## Contributing
 
 If you have any proposed changes, please make a pull request or issue!
 
-brute was designed as a pragmatic approach towards testing bruteforce attacks on various platforms. In no way does it endorse malicious hacking. Please do not support the use of this code as a method of advancing black-hat activites.
+brute was designed as a pragmatic approach towards credential stuffing and reuse. In no way does it endorse malicious hacking. Please do not support the use of this code as a method of advancing black-hat activites.
 
 ## License
 
-[GPL-3.0](https://opensource.org/licenses/GPL-3.0)
+[MIT](https://codemuch.tech/license.txt)
