@@ -57,7 +57,7 @@ class BruteLogger:
         print(f"{Color.G}{input_str}{Color.W}")
 
     @staticmethod
-    def output(color: Color, input_str: str, end_color: Color = Color.W):
+    def output(color: str, input_str: str, end_color: str = Color.W):
         print(f"{color}{input_str}{end_color}")
 
     #########################

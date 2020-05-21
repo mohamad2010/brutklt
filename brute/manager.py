@@ -40,7 +40,6 @@ class BruteManager:
         namespace = f"brute.modules.{modtype}"
 
         mod_dir = os.path.join(modpath, modtype)
-        pkg_dir = pathlib.Path(mod_dir).resolve()
 
         # print(pkg_dir)
 
@@ -48,7 +47,7 @@ class BruteManager:
         mods: t.Dict[str, t.Type[BruteBase]] = {}
 
         # get all modules with a BruteBase parent class
-        for (_, mod, _) in pkgutil.iter_modules([pkg_dir]):
+        for (_, mod, _) in pkgutil.iter_modules([mod_dir]):
 
             # initialize submodule name to inspect
             modname = f"{namespace}.{mod}"
@@ -116,7 +115,7 @@ class BruteManager:
         """
         Returns all the module types supported by brute.
         """
-        return self.modules.keys()
+        return list(self.modules.keys())
 
     def get_module(self, name: str) -> t.Optional[t.Type[BruteBase]]:
         """

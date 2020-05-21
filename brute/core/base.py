@@ -44,7 +44,7 @@ class BruteBase:
 
     # wordlist is a placeholder attribute that is replaced by the wordlist property method. When
     # called, _wordlist_path is returned, and when set, the wordlist pool is populated
-    wordlist: str
+    wordlist: t.Optional[str] = None
     _wordlist_path: str = dataclasses.field(init=False, repr=False)
     _wordlist: t.List[str] = dataclasses.field(init=False, repr=False)
 
@@ -78,7 +78,7 @@ class BruteBase:
                 f"{str(cls)} standalone credential stuffing module"
             )
         else:
-            parser: argparse.ArgumentParser = cls._parser
+            parser = cls._parser
 
         parser.add_argument(
             "-u",
@@ -108,7 +108,7 @@ class BruteBase:
         cls._args = args
         return cls._args
 
-    @property
+    @property # type: ignore
     def wordlist(self) -> str:
         """
         When the wordlist property is called, the path is returned instead
@@ -159,7 +159,7 @@ class BruteBase:
         """
         raise NotImplementedError("must be implemented by module or module parent")
 
-    def sanity(self) -> int:
+    def sanity(self):
         """
         Defines a sanity check to perform before execution, such as sending a single request
         to determine availability / uptime. Should return an zero integer status to inform the
@@ -167,7 +167,7 @@ class BruteBase:
         """
         raise NotImplementedError("must be implemented by module or module parent")
 
-    def brute(self, username: str, pwd_guess: str) -> str:
+    def brute(self, username: str, pwd_guess: str):
         """
         Defines a single authorization request against the target service. This method
         should be implemented by the user in order to represent how the request is
@@ -205,8 +205,8 @@ class BruteBase:
         # check to see if the strings set in success/fail are in the response.
         for _word in self._wordlist:
             try:
-                word = _word.strip("\n")
-                resp = self.brute(self.username, word)
+                word: str = _word.strip("\n")
+                resp = self.brute(self.username, word) # type: ignore
                 if self.success == resp:
                     self.log.auth_success(self.username, word)
                 else:

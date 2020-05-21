@@ -41,7 +41,7 @@ class ProtocolBruteforce(BruteBase):
                 f"{str(cls)} standalone credential stuffing module"
             )
         else:
-            parser: argparse.ArgumentParser = cls._parser
+            parser = cls._parser
 
         parser.add_argument(
             "-a",

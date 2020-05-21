@@ -67,7 +67,7 @@ class WebBruteforce(BruteBase):
                 f"{str(cls)} standalone credential stuffing module"
             )
         else:
-            parser: argparse.ArgumentParser = cls._parser
+            parser = cls._parser
 
         parser.add_argument(
             "--headless",
@@ -131,9 +131,6 @@ class WebBruteforce(BruteBase):
             self.browser = webdriver.Firefox()
             self.browser.get(self.address)
 
-    def sanity(self) -> None:
-        pass
-
     def brute(self, username: str, pwd_guess: str) -> str:
         """
         Overrides based on whether we are running headless or browser mode.
@@ -149,8 +146,8 @@ class WebBruteforce(BruteBase):
         fast and default way to do any type of web-based bruteforcing.
         """
         self.browser.select_form(nr=0)
-        self.browser.form[self.fields["username"]] = username
-        self.browser.form[self.fields["password"]] = pwd_guess
+        self.browser.form[self.fields["username"]] = username # type: ignore
+        self.browser.form[self.fields["password"]] = pwd_guess # type: ignore
         response = self.browser.submit()
 
         # use bs4 to parse html and return title
@@ -165,12 +162,12 @@ class WebBruteforce(BruteBase):
         """
 
         # find the username input field, and send keys
-        user_elem = self.browser.find_element(By.NAME, self.fields["username"])
+        user_elem = self.browser.find_element(By.NAME, self.fields["username"]) # type: ignore
         user_elem.clear()
         user_elem.send_keys(username)
 
         # find the password input field, and send keys
-        pwd_elem = self.browser.find_element(By.NAME, self.fields["password"])
+        pwd_elem = self.browser.find_element(By.NAME, self.fields["password"]) # type: ignore
         pwd_elem.clear()
         pwd_elem.send_keys(pwd_guess)
 

@@ -144,14 +144,17 @@ def main():
     if _module is None:
         logger.error(f"[!] No module found with name `{args.module}`")
 
-    # initialize module with all parameters and run. Assume generic type and
-    # use all arg params, let object figure it out.
+    # initialize module with all parameters and run, assuming generic type
     module = _module(
         address=args.address,
         username=args.username,
         wordlist=args.wordlist,
         delay=args.delay,
     )
+
+    if hasattr(module, "port") and args.port:
+        module.port = args.port
+
     module.run()
 
 
