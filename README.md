@@ -1,9 +1,10 @@
-<p align="center">
-    <h1> brute </h1>
-    <a href="https://github.com/ex0dus-0x/brute/issues"><img src="https://img.shields.io/github/issues/ex0dus-0x/brute.svg" alt="Github forks"></img></a>
-    <a href="https://raw.githubusercontent.com/ex0dus-0x/brute/master/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></img></a>
+# brute
 
-</p>
+[![Build Status](https://img.shields.io/github/workflow/status/ex0dus-0x/brute/CI/master)](https://github.com/ex0dus-0x/brute/actions?query=workflow%3ACI)
+[![PyPI Version](https://badge.fury.io/py/brute.svg)](https://badge.fury.io/py/brute)
+[![Github Issues](https://img.shields.io/github/issues/ex0dus-0x/brute.svg)](https://github.com/ex0dus-0x/brute/issues)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://codemuch.tech/license.txt)
+
 
 Crowd-sourced credential stuffing engine built for security professionals
 
