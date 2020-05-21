@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
@@ -11,9 +9,12 @@ on:
 jobs:
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Checkout source
+        uses: actions/checkout@v2
 
       - name: Setup Python 3.7
         uses: actions/setup-python@v1
