@@ -28,8 +28,8 @@ class Twitter(WebBruteforce):
 if __name__ == "__main__":
     args = Twitter.parse_args()
     br = Twitter(
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        headless = args.headless
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        headless=args.headless,
     ).run()

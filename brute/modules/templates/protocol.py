@@ -23,14 +23,13 @@ from brute.core.protocol import ProtocolBruteforce
 class MOD(ProtocolBruteforce):
     name = "NAME"
 
-    address = ??
-    port = ??
-
+    # replace! you can delete address if you choose to specify through a CLI.
+    address = "0.0.0.0"
+    port = 00
 
     @property
     def success(self) -> int:
         return 0
-
 
     def init(self):
         """
@@ -40,9 +39,7 @@ class MOD(ProtocolBruteforce):
         """
         pass
 
-
-    #def sanity(self):
-
+    # def sanity(self):
 
     def brute(self, username, pwd_guess) -> int:
         """
@@ -53,13 +50,12 @@ class MOD(ProtocolBruteforce):
         pass
 
 
-
 if __name__ == "__main__":
     args = MOD.parse_args()
     MOD(
-        address = args.address,
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        port = args.port
+        address=args.address,
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        port=args.port,
     ).run()

@@ -5,7 +5,9 @@ __main__.py
     Main CLI entry point to the `brute` application, which provides
     an interface for selecting attack modules, or incorporating new ones.
 """
+
 import os
+import sys
 import argparse
 
 import brute.manager
@@ -16,7 +18,8 @@ logger = brute.logger.BruteLogger(__name__)
 
 
 def main():
-    print("""
+    print(
+        """
   _                _   _____
  | |__  _ __ _   _| |_|___ /
  | "_ \| "__| | | | __| |_ \/
@@ -24,50 +27,68 @@ def main():
  |_.__/|_|   \__,_|\__|____/
 
     crowd-sourced credential stuffing engine built for security professionals
-""")
+"""
+    )
 
-    parser = argparse.ArgumentParser(description="crowd-sourced credential stuffing engine")
+    parser = argparse.ArgumentParser(
+        description="crowd-sourced credential stuffing engine"
+    )
 
     # defines the module management argument group to interact with attack modules.
     module = parser.add_argument_group("Module Management")
     module.add_argument(
-        "--list_modules", action="store_true",
-        help="List out the currently available modules in the local registry."
+        "--list_modules",
+        action="store_true",
+        help="List out the currently available modules in the local registry.",
     )
     module.add_argument(
-        "--add_module", dest="add_module",
-        help="Add a new module to the local registry."
+        "--add_module",
+        dest="add_module",
+        help="Add a new module to the local registry.",
     )
     module.add_argument(
-        "--new_module", dest="new_module",
-        help="Given a specifier (type/name), initializes a new module plugin script to current dir."
+        "--new_module",
+        dest="new_module",
+        help="Given a specifier (type/name), initializes a new module plugin script to current dir.",
     )
 
     # defines the attack argument group, which provisions a module for an actual attack.
     attack = parser.add_argument_group("Launching an Attack")
     attack.add_argument(
-        "-m", "--module", dest="module",
-        help="Provide a valid module to be executed."
+        "-m", "--module", dest="module", help="Provide a valid module to be executed."
     )
     attack.add_argument(
-        "-u", "--username", dest="username",
-        help="Provide a valid username/identifier for module being executed"
+        "-u",
+        "--username",
+        dest="username",
+        help="Provide a valid username/identifier for module being executed",
     )
     attack.add_argument(
-        "-w", "--wordlist", dest="wordlist",
-        help="Provide a file path or directory to a wordlist"
+        "-w",
+        "--wordlist",
+        dest="wordlist",
+        help="Provide a file path or directory to a wordlist",
     )
     attack.add_argument(
-        "-a", "--address", dest="address",
-        help="Provide host address for specified service. Required for certain protocols"
+        "-a",
+        "--address",
+        dest="address",
+        help="Provide host address for specified service. Required for certain protocols",
     )
     attack.add_argument(
-        "-p", "--port", type=int, dest="port",
-        help="Provide port for host address for specified service. If not specified, will be automatically set as default."
+        "-p",
+        "--port",
+        type=int,
+        dest="port",
+        help="Provide port for host address for specified service, otherwise default will be used",
     )
     attack.add_argument(
-        "-d", "--delay", type=int, dest="delay", default=5,
-        help="Provide the number of seconds the program delays as each password is tried"
+        "-d",
+        "--delay",
+        type=int,
+        dest="delay",
+        default=5,
+        help="Provide the number of seconds the program delays as each password is tried",
     )
     args = parser.parse_args()
 
@@ -77,17 +98,19 @@ def main():
     # handle module-management arguments and exit after
     if args.list_modules:
         print(manager.stats)
-        exit(0)
+        sys.exit(0)
 
     if args.new_module:
         (modtype, name) = args.new_module.split("/")
         if not modtype in manager.modtypes:
             logger.error(f"Module type `{modtype}` not recognized!")
-            exit(1)
+            sys.exit(1)
 
         path = manager.new_module(modtype, name)
-        logger.good(f"[*] Initialized new plugin module `{modtype}.{name}` at {path} [*]")
-        exit(0)
+        logger.good(
+            f"[*] Initialized new plugin module `{modtype}.{name}` at {path} [*]"
+        )
+        sys.exit(0)
 
     if args.add_module:
         modpath = os.path.abspath(args.add_module)
@@ -96,26 +119,25 @@ def main():
             logger.error("[!] Could not add new plugin to local registry [!]")
         else:
             logger.good(f"[*] Added plugin module to local registry at {path} [*]")
-        exit(0)
-
+        sys.exit(0)
 
     # Specify mandatory options.
-    man_options = ['username', 'wordlist']
-    for m in man_options:
-        if not args.__dict__[m]:
+    man_options = ["username", "wordlist"]
+    for opt in man_options:
+        if not args.__dict__[opt]:
             parser.print_help()
             logger.error("[!] You have to specify a username AND a wordlist! [!]")
-            exit(1)
+            sys.exit(1)
 
     # Detect if service arg is provided
     if args.module is None:
         logger.error("[!] No module name specified! [!]")
-        exit(1)
+        sys.exit(1)
 
     # Detect is wordlist path is correct
-    if os.path.exists(args.wordlist) == False:
+    if not os.path.exists(args.wordlist):
         logger.error("[!] Wordlist not found! [!]")
-        exit(1)
+        sys.exit(1)
 
     # retrieve module from arguments
     _module = manager.get_module(args.module)
@@ -138,4 +160,4 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         logger.error("\n[!] Keyboard Interrupt detected! Killing program... [!]")
-        exit(1)
+        sys.exit(1)

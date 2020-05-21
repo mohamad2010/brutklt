@@ -1,5 +1,9 @@
 """
 base.py
+
+    Defines the base-level dataclass for every bruteforce module type.
+    Implements the most basic properties and method required for any
+    credential stuffing attack.
 """
 
 import os
@@ -15,11 +19,12 @@ class BruteException(Exception):
     """
     Defines a custom exception class for the Brute* objects
     """
+
     pass
 
 
 @dataclasses.dataclass
-class BruteBase(object):
+class BruteBase:
     """
     Root base dataclasses.dataclass to inherit properties and methods
     for instantiation of a Brute module. Contains the most basic
@@ -38,7 +43,7 @@ class BruteBase(object):
     username: t.Optional[str] = None
 
     # wordlist is a placeholder attribute that is replaced by the wordlist property method. When
-    # called, _wordlist_path is returned, but when set, the _wordlist pool is populated from a given path.
+    # called, _wordlist_path is returned, and when set, the wordlist pool is populated
     wordlist: str
     _wordlist_path: str = dataclasses.field(init=False, repr=False)
     _wordlist: t.List[str] = dataclasses.field(init=False, repr=False)
@@ -53,10 +58,8 @@ class BruteBase(object):
     _args: t.Optional[argparse.Namespace] = None
     _parser: t.Optional[argparse.ArgumentParser] = None
 
-
     def __str__(self) -> str:
         return f"{self.name}"
-
 
     @classmethod
     def parse_args(cls) -> argparse.Namespace:
@@ -71,18 +74,31 @@ class BruteBase(object):
 
         # check if child classes already initialized an argument parser with options
         if not cls._parser:
-            parser: argparse.ArgumentParser = argparse.ArgumentParser(f"{str(cls)} standalone credential stuffing module")
+            parser: argparse.ArgumentParser = argparse.ArgumentParser(
+                f"{str(cls)} standalone credential stuffing module"
+            )
         else:
             parser: argparse.ArgumentParser = cls._parser
 
-        parser.add_argument("-u", "--username", dest="username",
-            help="Provide a valid username/identifier for module being executed"
+        parser.add_argument(
+            "-u",
+            "--username",
+            dest="username",
+            help="Provide a valid username/identifier for module being executed",
         )
-        parser.add_argument("-w", "--wordlist", dest="wordlist",
-            help="Provide a file path or directory to a wordlist"
+        parser.add_argument(
+            "-w",
+            "--wordlist",
+            dest="wordlist",
+            help="Provide a file path or directory to a wordlist",
         )
-        parser.add_argument("-d", "--delay", dest="delay", type=int, default=5,
-            help="Provide the number of seconds the program delays as each password is tried"
+        parser.add_argument(
+            "-d",
+            "--delay",
+            dest="delay",
+            type=int,
+            default=5,
+            help="Provide the number of seconds the program delays as each password is tried",
         )
 
         # TODO: config logging
@@ -92,7 +108,6 @@ class BruteBase(object):
         cls._args = args
         return cls._args
 
-
     @property
     def wordlist(self) -> str:
         """
@@ -100,7 +115,6 @@ class BruteBase(object):
         of the private wordlist pool.
         """
         return self._wordlist_path
-
 
     @wordlist.setter
     def wordlist(self, path: str) -> None:
@@ -120,16 +134,15 @@ class BruteBase(object):
         if os.path.isdir(path):
             for filename in os.listdir(path):
                 if os.path.isfile(filename):
-                    with open(os.path.join(path, filename), 'r') as f:
-                        self._wordlist += f.readlines()
+                    with open(os.path.join(path, filename), "r") as wordfile:
+                        self._wordlist += wordfile.readlines()
 
         # otherwise read file normally
         elif os.path.isfile(path):
-            with open(path, 'r') as f:
-                self._wordlist += f.readlines()
+            with open(path, "r") as wordfile:
+                self._wordlist += wordfile.readlines()
         else:
             raise BruteException("cannot parse out wordlists from path")
-
 
     @property
     def success(self) -> t.Any:
@@ -140,40 +153,39 @@ class BruteBase(object):
         """
         raise NotImplementedError("must be implemented by module or module parent")
 
-
     def init(self) -> None:
         """
-        Initializes necessary objects, environment, etc. before starting the bruteforce execution loop.
+        Initializes necessary objects, environment, etc. before starting the execution loop.
         """
         raise NotImplementedError("must be implemented by module or module parent")
-
 
     def sanity(self) -> int:
         """
-        Defines a sanity check to perform before execution, such as sending a single request to determine availability / uptime.
-        Should return an zero integer status to inform the execution routine that the service is available.
+        Defines a sanity check to perform before execution, such as sending a single request
+        to determine availability / uptime. Should return an zero integer status to inform the
+        execution routine that the service is available.
         """
         raise NotImplementedError("must be implemented by module or module parent")
 
-
     def brute(self, username: str, pwd_guess: str) -> str:
         """
-        Defines a single authorization request against the target service. This methods should be implemented by the user in order
-        to represent how the request is initialized with a user/pwd combo and sent, and should return a status message to check.
+        Defines a single authorization request against the target service. This method
+        should be implemented by the user in order to represent how the request is
+        initialized with a user/pwd combo and sent, and should return a status message to check.
 
-        :type username: username to guess. Specified if future implementation allows cracking multiple usernames at once.
+        :type username: current username to guess.
         :type pwd_guess: represents the password guess currently loaded to test.
         """
         raise NotImplementedError("must be implemented by module or module parent")
 
-
     def run(self) -> None:
         """
-        Runs the full bruteforce execution. First, `init` is called to setup the environment, and a sanity-check is
-        optionally imposed. The main execution loop is called, with the implemented `brute()` method called per word
-        in the wordlist to authenticate.
+        Runs the full bruteforce execution. First, `init` is called to setup the environment,
+        and a sanity-check is optionally imposed. The main execution loop is called, with the
+        implemented `brute()` method called per word in the wordlist to authenticate.
 
-        The user should NOT re-implement run() unless the service being tested deviates from specification greatly.
+        The user should NOT re-implement run() unless the service being tested
+        deviates from specification greatly.
         """
 
         # initialize the environment for bruteforcing
@@ -183,12 +195,14 @@ class BruteBase(object):
         # TODO: change out exception block for something safer
         try:
             if self.sanity() != 0:
-                raise BruteException("Target service failed sanity check, may not be available.")
+                raise BruteException(
+                    "Target service failed sanity check, may not be available."
+                )
         except NotImplementedError:
             self.log.warn("[*] Skipping the sanity-check, not implemented [*]")
 
-        # bruteforce execution loop: send a single authentication request per word, and check to see if the
-        # strings set in success/fail are in the response.
+        # bruteforce execution loop: send a single authentication request per word, and
+        # check to see if the strings set in success/fail are in the response.
         for _word in self._wordlist:
             try:
                 word = _word.strip("\n")
@@ -201,5 +215,5 @@ class BruteBase(object):
                 # sleep and then request again
                 time.sleep(self.delay)
 
-            except Exception as e:
-                raise BruteException("Caught exception {} when running bruteforce execution loop".format(e))
+            except Exception as error:
+                raise BruteException(f"Caught runtime exception: `{error}`")

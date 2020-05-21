@@ -24,18 +24,14 @@ class Smtp(ProtocolBruteforce):
     name = "smtp"
     port = 25
 
-
     @property
     def success(self) -> int:
         return 0
 
-
     def init(self):
         self.smtp = smtplib.SMTP(self.address, self.port)
 
-
-    #def sanity(self):
-
+    # def sanity(self):
 
     def brute(self, username, pwd_guess) -> int:
         status: int = 0
@@ -54,9 +50,9 @@ class Smtp(ProtocolBruteforce):
 if __name__ == "__main__":
     args = Smtp.parse_args()
     Smtp(
-        address = args.address,
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        port = args.port
+        address=args.address,
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        port=args.port,
     ).run()

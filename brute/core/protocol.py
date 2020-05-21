@@ -25,10 +25,8 @@ class ProtocolBruteforce(BruteBase):
     # default port the service should reside on
     port: int = dataclasses.field(default_factory=int)
 
-
     def __str__(self) -> str:
         return f"{self.name}"
-
 
     @classmethod
     def parse_args(cls) -> argparse.Namespace:
@@ -39,17 +37,26 @@ class ProtocolBruteforce(BruteBase):
 
         # check if child classes already initialized an argument parser with options
         if not cls._parser:
-            parser: argparse.ArgumentParser = argparse.ArgumentParser(f"{str(cls)} standalone credential stuffing module")
+            parser: argparse.ArgumentParser = argparse.ArgumentParser(
+                f"{str(cls)} standalone credential stuffing module"
+            )
         else:
             parser: argparse.ArgumentParser = cls._parser
 
-        parser.add_argument("-a", "--address", dest="address",
-            help="Provide host address for protocol attack, otherwise default attribute will be used."
+        parser.add_argument(
+            "-a",
+            "--address",
+            dest="address",
+            help="Provide host address for protocol attack.",
         )
 
         parser.add_argument(
-            "-p", "--port", type=int, dest="port", default=cls.port,
-            help="Provide port for host address for specified service. If not specified, will be automatically set as default."
+            "-p",
+            "--port",
+            type=int,
+            dest="port",
+            default=cls.port,
+            help="Provide port for host address for specified service if not the default.",
         )
 
         # set parser, and finalize initialization in subclass

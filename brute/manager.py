@@ -21,7 +21,7 @@ from brute.core.protocol import ProtocolBruteforce
 Modules = t.Dict[str, t.Dict[str, t.Type[BruteBase]]]
 
 
-class BruteManager(object):
+class BruteManager:
     """
     Module manager that internally handles all the modules in the local registry.
     """
@@ -42,7 +42,7 @@ class BruteManager(object):
         mod_dir = os.path.join(modpath, modtype)
         pkg_dir = pathlib.Path(mod_dir).resolve()
 
-        #print(pkg_dir)
+        # print(pkg_dir)
 
         # modules to return
         mods: t.Dict[str, t.Type[BruteBase]] = {}
@@ -52,7 +52,7 @@ class BruteManager(object):
 
             # initialize submodule name to inspect
             modname = f"{namespace}.{mod}"
-            #print(modname)
+            # print(modname)
 
             module = importlib.import_module(modname)
 
@@ -74,7 +74,6 @@ class BruteManager(object):
 
         return mods
 
-
     def __init__(self):
         """
         Creates a mapping of all dynamically imported plugins for interaction.
@@ -86,28 +85,31 @@ class BruteManager(object):
 
         # initializes a mapping for each module type to each module name and instance
         self.modules: Modules = dict(
-            map(lambda x: (x, BruteManager._parse_mods(self.modpath, x)),
-            ["web", "protocol"]
-        ))
+            map(
+                lambda x: (x, BruteManager._parse_mods(self.modpath, x)),
+                ["web", "protocol"],
+            )
+        )
 
         # total number of modules, for returning stats
         self.total_modules: int = sum(len(v) for _, v in self.modules.items())
 
-
     @property
     def stats(self) -> str:
         """
-        Returns a string to output with brute module stats, including total count, plus each module organized
-        by module type.
+        Returns a string to output with brute module stats, including total count, plus
+        each module organized by module type.
         """
-        stat_str = f"\nTotal Number of Modules: {self.total_modules}\n\nAvailable Modules:\n\n"
-        for t, entries in self.modules.items():
-            stat_str += f"  {t.capitalize()} Modules:\n"
-            for k, _ in entries.items():
-                stat_str += f"    * {k}\n"
+
+        stat_str = f"\nTotal Number of Modules: {self.total_modules}\
+        \n\nAvailable Modules:\n\n"
+
+        for modtype, entries in self.modules.items():
+            stat_str += f"  {modtype.capitalize()} Modules:\n"
+            for name, _ in entries.items():
+                stat_str += f"    * {name}\n"
             stat_str += "\n"
         return stat_str
-
 
     @property
     def modtypes(self) -> t.List[str]:
@@ -115,7 +117,6 @@ class BruteManager(object):
         Returns all the module types supported by brute.
         """
         return self.modules.keys()
-
 
     def get_module(self, name: str) -> t.Optional[t.Type[BruteBase]]:
         """
@@ -125,12 +126,11 @@ class BruteManager(object):
         :type name: name of module to find
         """
         for _, mods in self.modules.items():
-            for n, mod in mods.items():
-                if n == name:
+            for modname, mod in mods.items():
+                if modname == name:
                     return mod
 
         return None
-
 
     def new_module(self, modtype: str, name: str, path: str = ".") -> str:
         """
@@ -145,23 +145,21 @@ class BruteManager(object):
         filename = os.path.abspath(f"{path}/{name}.py")
 
         # check if modtype is found, and initialize template
-        for f in os.listdir(templates_dir):
-            if (f.endswith(".py")) and (modtype == f.replace(".py", "")):
+        for temp in os.listdir(templates_dir):
+            if (temp.endswith(".py")) and (modtype == temp.replace(".py", "")):
 
                 # read to buffer to mutate template
-                with open(os.path.join(templates_dir, f), "r") as f:
-                    template = f.read()
+                with open(os.path.join(templates_dir, temp), "r") as temp_file:
+                    template = temp_file.read()
 
                 template = template.replace("NAME", name)
                 template = template.replace("MOD", name.capitalize())
 
                 # write new file to CWD
-                with open(filename, "w") as f:
-                    f.write(template)
+                with open(filename, "w") as temp_file:
+                    temp_file.write(template)
 
         return filename
-
-
 
     def add_module(self, orig_path: str) -> t.Optional[str]:
         """

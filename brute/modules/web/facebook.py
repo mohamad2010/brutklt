@@ -22,8 +22,7 @@ class Facebook(WebBruteforce):
     name = "facebook"
     address = "https://facebook.com/login"
 
-    fields = { "username": "email", "password": "pass" }
-
+    fields = {"username": "email", "password": "pass"}
 
     @property
     def success(self):
@@ -36,8 +35,8 @@ class Facebook(WebBruteforce):
 if __name__ == "__main__":
     args = Facebook.parse_args()
     br = Facebook(
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        headless = args.headless
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        headless=args.headless,
     ).run()

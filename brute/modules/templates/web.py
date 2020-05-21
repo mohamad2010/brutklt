@@ -23,8 +23,7 @@ class MOD(WebBruteforce):
     name = "NAME"
     address = "https://yoururl.com"
 
-    fields = { "username": "", "password": "" }
-
+    fields = {"username": "", "password": ""}
 
     @property
     def success(self):
@@ -34,19 +33,18 @@ class MOD(WebBruteforce):
         """
         return "Success!"
 
+    # def init(self):
 
-    #def init(self):
+    # def sanity(self):
 
-    #def sanity(self):
-
-    #def brute(self):
+    # def brute(self):
 
 
 if __name__ == "__main__":
     args = MOD.parse_args()
     MOD(
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        headless = args.headless
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        headless=args.headless,
     ).run()

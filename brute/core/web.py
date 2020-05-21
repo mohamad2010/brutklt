@@ -6,12 +6,13 @@ web.py
     arbitrarily implemented for any URL endpoint doing authentication.
 """
 
+import argparse
 import time
+import typing as t
+import dataclasses
+
 import bs4
 import mechanize
-import dataclasses
-import argparse
-import typing as t
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -36,10 +37,7 @@ class WebBruteforce(BruteBase):
 
     # represents a mapping for embedded field elements to find. Values should represent the form
     # params for the specific site to input with.
-    fields: Params = {
-        "username": None,
-        "password": None
-    }
+    fields: Params = {"username": None, "password": None}
 
     # represents headers to pass with response.
     # TODO: populate and more configurations
@@ -48,10 +46,8 @@ class WebBruteforce(BruteBase):
     # if set, will not attach to an actual browser process to perform bruteforce
     headless: bool = False
 
-
     def __str__(self) -> str:
         return f"{self.name}"
-
 
     @classmethod
     def parse_args(cls) -> argparse.Namespace:
@@ -67,19 +63,23 @@ class WebBruteforce(BruteBase):
 
         # check if child classes already initialized an argument parser with options
         if not cls._parser:
-            parser: argparse.ArgumentParser = argparse.ArgumentParser(f"{str(cls)} standalone credential stuffing module")
+            parser: argparse.ArgumentParser = argparse.ArgumentParser(
+                f"{str(cls)} standalone credential stuffing module"
+            )
         else:
             parser: argparse.ArgumentParser = cls._parser
 
         parser.add_argument(
-            "--headless", action="store_true",
+            "--headless",
+            action="store_true",
             help="Execute the attack by without an actual browser or webdriver.",
         )
 
         """
         parser.add_argument(
             "--override_fields", type=json.loads, dest="override_fields",
-            help="Overrides the name of the username/password parameter fields in a dict format {'username': '', 'password': ''}.",
+            help="Overrides the name of the username/password parameter fields in a dict format \
+            {'username': '', 'password': ''}.",
         )
 
         parser.add_argument(
@@ -97,7 +97,6 @@ class WebBruteforce(BruteBase):
         cls._parser = parser
         return super().parse_args()
 
-
     def init(self):
         """
         Initializes the proper browser for authentication based on configuration, and performs
@@ -106,7 +105,9 @@ class WebBruteforce(BruteBase):
 
         # error if no field params are set.
         if not any(self.fields.values()):
-            raise BruteException("no input parameters for user/pwd combo given for module.")
+            raise BruteException(
+                "no input parameters for user/pwd combo given for module."
+            )
 
         if self.headless:
 
@@ -119,7 +120,7 @@ class WebBruteforce(BruteBase):
             browser.set_cookiejar(cookies)
 
             if self.headers is not None:
-                browser.addheaders = [(k, v) for k, v in self.headers.items()]
+                browser.addheaders = list(self.headers.items())
             browser.set_handle_refresh(False)
 
             # initialize as attribute, and open
@@ -130,6 +131,8 @@ class WebBruteforce(BruteBase):
             self.browser = webdriver.Firefox()
             self.browser.get(self.address)
 
+    def sanity(self) -> None:
+        pass
 
     def brute(self, username: str, pwd_guess: str) -> str:
         """
@@ -137,16 +140,15 @@ class WebBruteforce(BruteBase):
         """
         if self.headless:
             return self._headless_brute(username, pwd_guess)
-        else:
-            return self._driver_brute(username, pwd_guess)
 
+        return self._driver_brute(username, pwd_guess)
 
     def _headless_brute(self, username: str, pwd_guess: str) -> str:
         """
         Attempts authentication using a headless browser provided by mechanize. Should be the
         fast and default way to do any type of web-based bruteforcing.
         """
-        self.browser.select_form(nr = 0)
+        self.browser.select_form(nr=0)
         self.browser.form[self.fields["username"]] = username
         self.browser.form[self.fields["password"]] = pwd_guess
         response = self.browser.submit()
@@ -154,7 +156,6 @@ class WebBruteforce(BruteBase):
         # use bs4 to parse html and return title
         html = bs4.BeautifulSoup(response.read(), "html.parser")
         return html.title.text
-
 
     def _driver_brute(self, username: str, pwd_guess: str) -> str:
         """
@@ -166,7 +167,7 @@ class WebBruteforce(BruteBase):
         # find the username input field, and send keys
         user_elem = self.browser.find_element(By.NAME, self.fields["username"])
         user_elem.clear()
-        user_elem.send_keys(self.username)
+        user_elem.send_keys(username)
 
         # find the password input field, and send keys
         pwd_elem = self.browser.find_element(By.NAME, self.fields["password"])

@@ -10,7 +10,7 @@ import os
 import setuptools
 
 NAME = "brute"
-VERSION = "4.0"
+VERSION = "5.0"
 
 REPO = "https://github.com/ex0dus-0x/brute"
 DESC = "crowd-sourced credential stuffing engine built for security professionals"
@@ -34,8 +34,17 @@ setuptools.setup(
         "mechanize",
         "paramiko",
         "selenium",
-        "xmpppy",
+        "beautifulsoup4"
     ],
+    extras_require={
+        "dev": [
+            "black",
+            "pylint",
+            "pytest",
+            "mock",
+            "mypy"
+        ]
+    },
     classifiers=[
         "Development Status :: 1 - Planning",
         "Intended Audience :: End Users/Desktop",

@@ -28,16 +28,13 @@ class Ftp(ProtocolBruteforce):
     def success(self) -> int:
         return 0
 
-
     def init(self):
         """
         Initializes the FTP client for interaction.
         """
         self.ftp = ftplib.FTP()
 
-
-    #def sanity(self):
-
+    # def sanity(self):
 
     def brute(self, username, pwd_guess) -> int:
         """
@@ -57,9 +54,9 @@ class Ftp(ProtocolBruteforce):
 if __name__ == "__main__":
     args = Ftp.parse_args()
     Ftp(
-        address = args.address,
-        username = args.username,
-        wordlist = args.wordlist,
-        delay = args.delay,
-        port = args.port
+        address=args.address,
+        username=args.username,
+        wordlist=args.wordlist,
+        delay=args.delay,
+        port=args.port,
     ).run()
