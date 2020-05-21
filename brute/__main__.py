@@ -49,7 +49,7 @@ def main():
     module.add_argument(
         "--new_module",
         dest="new_module",
-        help="Given a specifier (type/name), initializes a new module plugin script to current dir.",
+        help="Given a specifier (type/name), initialize a new module plugin.",
     )
 
     # defines the attack argument group, which provisions a module for an actual attack.

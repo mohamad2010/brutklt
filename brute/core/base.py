@@ -108,7 +108,7 @@ class BruteBase:
         cls._args = args
         return cls._args
 
-    @property # type: ignore
+    @property  # type: ignore
     def wordlist(self) -> str:
         """
         When the wordlist property is called, the path is returned instead
@@ -206,7 +206,7 @@ class BruteBase:
         for _word in self._wordlist:
             try:
                 word: str = _word.strip("\n")
-                resp = self.brute(self.username, word) # type: ignore
+                resp = self.brute(self.username, word)  # type: ignore
                 if self.success == resp:
                     self.log.auth_success(self.username, word)
                 else:

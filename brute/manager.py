@@ -9,7 +9,6 @@ import os
 import shutil
 import inspect
 import pkgutil
-import pathlib
 import importlib
 import typing as t
 
