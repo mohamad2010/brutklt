@@ -6,13 +6,28 @@ base.py
     credential stuffing attack.
 """
 
+import re
 import os
 import time
 import argparse
 import typing as t
 import dataclasses
 
+import requests
+
 from brute.logger import BruteLogger
+
+# I guess we stealing Django code now
+# https://stackoverflow.com/questions/7160737/python-how-to-validate-a-url-in-python-malformed-or-not
+URL_REGEX = re.compile(
+    r"^(?:http|ftp)s?://"  # http:// or https://
+    r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+    r"localhost|"  # localhost...
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+    r"(?::\d+)?"  # optional port
+    r"(?:/?|[/?]\S+)$",
+    re.IGNORECASE,
+)
 
 
 class BruteException(Exception):
@@ -138,18 +153,30 @@ class BruteBase:
         return self._combo_path
 
     @combos.setter
-    def combos(self, path: str) -> None:
+    def combos(self, path: t.Optional[str]) -> None:
         """
-        Given a path to a combo file, parse out colon-seperated user/pass combinations.
+        Given a path or URL to a combo file, parse out colon-seperated user/pass combinations.
 
         :type path: path to combination list
         """
 
-        if not os.path.isfile(path):
-            raise BruteException("combo path is not valid")
+        # skip if None, since this is optional
+        if not path:
+            return
 
         # initialize combo dict
         self._combo_dict: t.Dict[str, str] = {}
+
+        # check if valid url, send request and store lines of the body in-memory
+        if re.match(URL_REGEX, path):
+            req = requests.get(path)
+            self._combo_dict = {
+                line.split(":")[0]: line.split(":")[1] for line in req.text.splitlines()
+            }
+            return
+
+        if not os.path.isfile(path):
+            raise BruteException("combo path is not valid")
 
         # initialize path
         self._combo_path: str = os.path.abspath(path)
@@ -195,7 +222,7 @@ class BruteBase:
     @property  # type: ignore
     def wordlist(self) -> str:
         """
-        When the wordlist property is called, the path is returned instead
+        When the wordlist property is called, the path/URL is returned instead
         of the private wordlist pool.
         """
         return self._wordlist_path
@@ -212,13 +239,17 @@ class BruteBase:
         if not path:
             return
 
-        # TODO: check for HTTP link
+        # initialize corpus pool for wordlists
+        self._wordlist = []
 
         # initialize path to wordlists for display purposes
         self._wordlist_path = os.path.abspath(path)
 
-        # initialize corpus pool for wordlists
-        self._wordlist = []
+        # check if valid url, send request and store lines of the body in-memory
+        if re.match(URL_REGEX, path):
+            req = requests.get(path)
+            self._wordlist += [line for line in req.text.splitlines()]
+            return
 
         # enumerate directory and initialize pool with all files
         if os.path.isdir(path):
@@ -293,37 +324,39 @@ class BruteBase:
             self.log.warn("[*] Skipping the sanity-check, not implemented [*]")
 
         # if the combos argument is specified, run against those permutations instead
-        if len(self._combo_dict) != 0:
-            for user, pwd in self._combo_dict.items():
-                pwd = pwd.strip("\n")
+        if hasattr(self, "_combo_dict"):
+            if len(self._combo_dict) != 0:
+                for user, pwd in self._combo_dict.items():
+                    pwd = pwd.strip("\n")
+                    try:
+                        resp = self.brute(user, pwd)
+                        if self.success == resp:
+                            self.log.auth_success(user, pwd)
+                        else:
+                            self.log.auth_fail(user, pwd)
+
+                        # sleep and then request again
+                        time.sleep(self.delay)
+
+                    except Exception as error:
+                        raise BruteException(f"Caught runtime exception: `{error}`")
+
+                return
+
+        # bruteforce execution loop: send a single authentication request per word, and
+        # check to see if the strings set in success/fail are in the response.
+        for user in self._usernames:
+            for word in self._wordlist:
+                word = word.strip("\n")
                 try:
-                    resp = self.brute(user, pwd)
+                    resp = self.brute(user, word)  # type: ignore
                     if self.success == resp:
-                        self.log.auth_success(user, pwd)
+                        self.log.auth_success(user, word)
                     else:
-                        self.log.auth_fail(user, pwd)
+                        self.log.auth_fail(user, word)
 
                     # sleep and then request again
                     time.sleep(self.delay)
 
                 except Exception as error:
                     raise BruteException(f"Caught runtime exception: `{error}`")
-
-            return
-
-        # bruteforce execution loop: send a single authentication request per word, and
-        # check to see if the strings set in success/fail are in the response.
-        for word in self._wordlist:
-            word = word.strip("\n")
-            try:
-                resp = self.brute(self.username, word)  # type: ignore
-                if self.success == resp:
-                    self.log.auth_success(self.username, word)
-                else:
-                    self.log.auth_fail(self.username, word)
-
-                # sleep and then request again
-                time.sleep(self.delay)
-
-            except Exception as error:
-                raise BruteException(f"Caught runtime exception: `{error}`")

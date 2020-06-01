@@ -31,6 +31,7 @@ setuptools.setup(
         ],
     },
     install_requires=[
+        "requests",
         "mechanize",
         "paramiko",
         "selenium",

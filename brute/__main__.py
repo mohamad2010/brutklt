@@ -141,11 +141,6 @@ def main():
                 )
                 sys.exit(1)
 
-        # Detect is wordlist path is correct
-        if not os.path.exists(args.wordlist):
-            logger.error("[!] Wordlist not found! [!]")
-            sys.exit(1)
-
     # Detect if service arg is provided
     if args.module is None:
         logger.error("[!] No module name specified! [!]")
