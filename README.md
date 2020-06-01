@@ -65,20 +65,25 @@ Module Management:
   --add_module ADD_MODULE
                         Add a new module to the local registry.
   --new_module NEW_MODULE
-                        Given a specifier (type/name), initializes a new module plugin script to current dir.
+                        Given a specifier (type/name), initialize a new module plugin.
 
 Launching an Attack:
   -m MODULE, --module MODULE
                         Provide a valid module to be executed.
+  -c COMBO_LIST, --combo_list COMBO_LIST
+                        Path or valid URL to combination list (--username and --wordlist will be ignored).
   -u USERNAME, --username USERNAME
-                        Provide a valid username/identifier for module being executed
+                        Provide a valid username/identifier for module being executed. Can either be a single
+                        username, comma-seperated list of users, or a file.
   -w WORDLIST, --wordlist WORDLIST
-                        Provide a file path or directory to a wordlist
+                        Provide a file path, directory of files, or a HTTP URL to a wordlist.
   -a ADDRESS, --address ADDRESS
-                        Provide host address for specified service. Required for certain protocols
-  -p PORT, --port PORT  Provide port for host address for specified service. If not specified, will be automatically set as default.
+                        Provide host address for specified service. Required for certain protocols.
+  -p PORT, --port PORT  Provide port for host address for specified service, otherwise default will be used.
   -d DELAY, --delay DELAY
-                        Provide the number of seconds the program delays as each password is tried
+                        Provide the number of seconds the program delays as each password is tried.
+  -t TIMEOUT, --timeout TIMEOUT
+                        Number of seconds to stop bruteforce execution on currently executing user.
 ```
 
 To interact with the modules in your local registry, you can do the following:
@@ -99,6 +104,32 @@ $ python3 mysite.py --username test --wordlist wordlist.txt
 # .. or add it to the registry and use it with the cli
 $ brute --add_module mysite.py
 $ brute -m mysite --username test --wordlist wordlist.txt
+```
+
+You can specify different credential inputs in different formats.
+
+First, you can use multiple usernames, either in a comma-seperated list or a file path. Be
+sure to set a timeout with `-t/--timeout` in order to stop an execution on a user after
+a finite amount of time. You can also choose to use a URL with a wordlist as well.
+
+```
+# with multiple usernames and a URL wordlist, timeout per user of 5 seconds
+$ brute -m mysite --username myname,othername,anothername, --wordlist https://example.com/leak.txt -t 5
+
+# with username file and wordlist file, timeout per user of 3 seconds
+$ brute -m mysite --username user.txt --wordlist pass.txt -t 3
+```
+
+To better automate credential stuffing campaigns, you can use `-c/--combo_list` instead
+of the `--username` and `--wordlist` flags, with either a filepath or URL. Be sure that the file
+contains a colon-seperated combo per line as so: `user:pass`.
+
+```
+# with a file
+$ brute -m mysite --combo_list test.txt
+
+# .. or a URL
+$ brute -m mysite --combo_list http://example.com/leak.txt
 ```
 
 ### Library
