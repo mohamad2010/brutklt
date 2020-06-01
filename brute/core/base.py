@@ -12,6 +12,7 @@ import time
 import argparse
 import typing as t
 import dataclasses
+import multiprocessing
 
 import requests
 
@@ -114,7 +115,7 @@ class BruteBase:
             "-c",
             "--combo_list",
             dest="combo_list",
-            help="Path to combination list (--username and --wordlist will be ignored).",
+            help="Path or valid URL to combination list (--username and --wordlist will be ignored).",
         )
         parser.add_argument(
             "-u",
@@ -135,7 +136,15 @@ class BruteBase:
             dest="delay",
             type=int,
             default=5,
-            help="Provide the number of seconds the program delays as each password is tried",
+            help="Provide the number of seconds the program delays as each password is tried.",
+        )
+        parser.add_argument(
+            "-t",
+            "--timeout",
+            dest="timeout",
+            type=int,
+            default=0,
+            help="Number of seconds to stop bruteforce execution on currently executing user.",
         )
 
         # TODO: config logging
@@ -343,9 +352,12 @@ class BruteBase:
 
                 return
 
-        # bruteforce execution loop: send a single authentication request per word, and
-        # check to see if the strings set in success/fail are in the response.
-        for user in self._usernames:
+        def exec_loop(self, username: str) -> None:
+            """
+            Inlined function representing an execution loop that can be initialized
+            as a seperate process during runtime in order to support timeouts and
+            multithreading.
+            """
             for word in self._wordlist:
                 word = word.strip("\n")
                 try:
@@ -360,3 +372,20 @@ class BruteBase:
 
                 except Exception as error:
                     raise BruteException(f"Caught runtime exception: `{error}`")
+
+        # bruteforce execution loop: send a single authentication request per word, and
+        # check to see if the strings set in success/fail are in the response.
+        for user in self._usernames:
+
+            # start a seperate process
+            proc = multiprocessing.Process(
+                target=exec_loop, name="brute_exec", args=(self, user,)
+            )
+            proc.start()
+
+            # wait until timeout
+            if self.timeout != 0:
+                time.sleep(self.timeout)
+                proc.terminate()
+                proc.join()
+                self.log.good("\n[!] Stopped execution after finite timeout [!]")

@@ -61,32 +61,33 @@ def main():
         "-c",
         "--combo_list",
         dest="combo_list",
-        help="Path to combination list (--username and --wordlist will be ignored).",
+        help="Path or valid URL to combination list (--username and --wordlist will be ignored).",
     )
     attack.add_argument(
         "-u",
         "--username",
         dest="username",
-        help="Provide a valid username/identifier for module being executed",
+        help="Provide a valid username/identifier for module being executed. \
+              Can either be a single username, comma-seperated list of users, or a file.",
     )
     attack.add_argument(
         "-w",
         "--wordlist",
         dest="wordlist",
-        help="Provide a file path or directory to a wordlist",
+        help="Provide a file path, directory of files, or a HTTP URL to a wordlist.",
     )
     attack.add_argument(
         "-a",
         "--address",
         dest="address",
-        help="Provide host address for specified service. Required for certain protocols",
+        help="Provide host address for specified service. Required for certain protocols.",
     )
     attack.add_argument(
         "-p",
         "--port",
         type=int,
         dest="port",
-        help="Provide port for host address for specified service, otherwise default will be used",
+        help="Provide port for host address for specified service, otherwise default will be used.",
     )
     attack.add_argument(
         "-d",
@@ -94,7 +95,15 @@ def main():
         type=int,
         dest="delay",
         default=5,
-        help="Provide the number of seconds the program delays as each password is tried",
+        help="Provide the number of seconds the program delays as each password is tried.",
+    )
+    attack.add_argument(
+        "-t",
+        "--timeout",
+        dest="timeout",
+        type=int,
+        default=0,
+        help="Number of seconds to stop bruteforce execution on currently executing user.",
     )
     args = parser.parse_args()
 
@@ -158,6 +167,7 @@ def main():
         username=args.username,
         wordlist=args.wordlist,
         delay=args.delay,
+        timeout=args.timeout,
     )
 
     if hasattr(module, "port") and args.port:
