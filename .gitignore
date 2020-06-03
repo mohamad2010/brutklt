@@ -7,3 +7,5 @@ build/
 .mypy_cache/
 
 *.log
+vendor/
+.jekyll-cache/
