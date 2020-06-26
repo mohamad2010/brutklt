@@ -1,0 +1,9 @@
+*.pyc
+*.egg-info
+*.log
+venv/
+dist/
+build/
+.mypy_cache/
+
+*.log
