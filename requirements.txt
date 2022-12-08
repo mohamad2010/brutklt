@@ -5,7 +5,7 @@ bcrypt==3.1.7
 beautifulsoup4==4.9.1
 black==19.10b0
 -e git+git@github.com:ex0dus-0x/brute.git@dcce5a14e287ee95d2fcbf778e56b9b5b7ea830e#egg=brute
-certifi==2020.4.5.1
+certifi==2022.12.7
 cffi==1.14.0
 chardet==3.0.4
 click==7.1.2
